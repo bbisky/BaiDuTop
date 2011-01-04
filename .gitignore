@@ -1,0 +1,9 @@
+*.user
+*.suo
+*/*/bin
+*/*/obj
+publish/
+Dotfuscated/
+*.lic
+*.rar
+*.zip
