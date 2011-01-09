@@ -92,6 +92,14 @@ namespace WebServerScan
             get { return m_HttpStatus; }
             set { m_HttpStatus = value; }
         }
+
+        private long m_ContentLength;
+
+        public long ContentLength
+        {
+            get { return m_ContentLength; }
+            set { m_ContentLength = value; }
+        }
        
     }
 }

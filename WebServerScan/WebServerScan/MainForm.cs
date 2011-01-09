@@ -18,12 +18,15 @@ namespace WebServerScan
     {               
         private IList<BaiDuResultInfo> m_DataSource;
         private int m_WorkStatus = 0;
+        private int m_TimeOut = 5000;
+        private int m_ThreadCount = 3;
         int rowIndex = 0;
         public MainForm()
         {
             InitializeComponent();
             this.dgvResult.AutoGenerateColumns = false;
             this.DoubleBuffered = true;
+            cb_ThreadCount.Text = "3";
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -31,9 +34,12 @@ namespace WebServerScan
             if (!string.IsNullOrEmpty(tbUrls.Text))
             {
                 dgvResult.DataSource = null;
+                if(!string.IsNullOrEmpty(cb_ThreadCount.Text))
+                    this.m_ThreadCount = Convert.ToInt32(cb_ThreadCount.Text);
                 groupBox1.Enabled = false;
                 ts_StatusLabel.Text = "正在查询...";
                 m_WorkStatus = 0;
+                this.m_TimeOut = Convert.ToInt32(tbTimeout.Text);
                 rowIndex = 0;
                 string scanClass = "C";
                 if (rb_ClassB.Checked)
@@ -72,19 +78,20 @@ namespace WebServerScan
                  ResolveIPAddress(resultList, scanClass);
                 
            // }
+                 lastDomain = bdri.Url;
             this.m_WorkStatus++;
             m_DataSource = resultList;
             BindData(resultList);
 
-            Thread pingThread = new Thread(new ParameterizedThreadStart(PingServer));
-            pingThread.IsBackground = true;
+            //Thread pingThread = new Thread(new ParameterizedThreadStart(PingServer));
+            //pingThread.IsBackground = true;
 
-            pingThread.Start(resultList);
-            HttpGet(resultList);
+            //pingThread.Start(resultList);
+            MultiHttpGet(resultList);
         }
 
         void CheckStatus() {
-            while (m_WorkStatus < 3)
+            while (m_WorkStatus < this.m_ThreadCount * 2 + 1)
             {
                 Thread.Sleep(100);
             }
@@ -214,7 +221,7 @@ namespace WebServerScan
                 if (scanClass == "C")
                 {
                     int current = Convert.ToInt32(ipSeg[3]);
-                    for (int i = 1; i < 256 ; i++)
+                    for (int i = 1; i < 255 ; i++)
                     {
                         if (i == current)
                             continue;
@@ -232,7 +239,7 @@ namespace WebServerScan
                 else if (scanClass == "B")
                 {
                     int current = Convert.ToInt32(ipSeg[2]);
-                    for (int i = 1; i < 256; i++)
+                    for (int i = 1; i < 255; i++)
                     {
                         if (i == current)
                             continue;
@@ -254,48 +261,110 @@ namespace WebServerScan
         #endregion       
 
         #region Connect服务器测试
+        //void PingServer(object p)
+        //{
+        //   // ts_StatusLabel.Text = "正在Connect服务器...";
+        //    IList<BaiDuResultInfo> resultList = p as IList<BaiDuResultInfo>;
+        //    foreach (BaiDuResultInfo bd in resultList)
+        //    {
+        //        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        //        try
+        //        {
+        //            if (bd.IP!=null && bd.IP != "未知")
+        //                socket.Connect(IPAddress.Parse(bd.IP), 80);
+        //            else if(!string.IsNullOrEmpty(bd.Url))
+        //                socket.Connect(bd.Url, 80);                        
+        //            bd.IsAlive = socket.Connected;
+        //        }
+        //        catch
+        //        {
+        //            bd.IsAlive = false;
+        //        }
+        //        finally {
+        //            socket.Close();
+        //        }
+               
+        //        UpdateCellValue(bd.RowIndex, "IsAlive", bd.AliveImage);
+        //    }
+        //    m_WorkStatus++;
+        //}
+
         void PingServer(object p)
         {
-           // ts_StatusLabel.Text = "正在Connect服务器...";
-            IList<BaiDuResultInfo> resultList = p as IList<BaiDuResultInfo>;
-            foreach (BaiDuResultInfo bd in resultList)
+            int[] range = p as int[];
+            int startIndex = range[0];
+            int endIndex = range[1];
+
+            for (; startIndex < endIndex; startIndex++)
             {
+                BaiDuResultInfo bd = this.m_DataSource[startIndex];
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 try
                 {
-                    if (bd.IP!=null && bd.IP != "未知")
+                    if (bd.IP != null && bd.IP != "未知")
                         socket.Connect(IPAddress.Parse(bd.IP), 80);
-                    else if(!string.IsNullOrEmpty(bd.Url))
-                        socket.Connect(bd.Url, 80);                        
+                    else if (!string.IsNullOrEmpty(bd.Url))
+                        socket.Connect(bd.Url, 80);
                     bd.IsAlive = socket.Connected;
                 }
                 catch
                 {
                     bd.IsAlive = false;
                 }
-                finally {
+                finally
+                {
                     socket.Close();
                 }
-               
+
                 UpdateCellValue(bd.RowIndex, "IsAlive", bd.AliveImage);
             }
-            m_WorkStatus++;
+            this.m_WorkStatus++;
         }
         #endregion
 
         #region HttpGet
-        void HttpGet(object p)
+        void MultiHttpGet(object p)
         {
             ts_StatusLabel.Text = "正在查询WEB状态,此操作时间较长,请耐心等待...";
             IList<BaiDuResultInfo> resultList = p as IList<BaiDuResultInfo>;
-            string lastDomain = "";
-            HttpWebRequest req;
-            foreach (BaiDuResultInfo bd in resultList)
+            int n = resultList.Count / this.m_ThreadCount + 1;
+            for (int i = 0; i < this.m_ThreadCount; i++ )
             {
-                 
-                if (!string.IsNullOrEmpty(bd.Url))
-                    lastDomain = bd.Url;
+                int startIndex = i * n;
+                int endIndex = (i + 1) * n ;
+                if (endIndex > resultList.Count)
+                {
+                    endIndex = resultList.Count;
+                }
+                Thread childThread = new Thread(new ParameterizedThreadStart(HttpGet));
+                childThread.Name = "httpget_" + i.ToString();
+                childThread.IsBackground = true;
+                childThread.Start(new int[] {startIndex,endIndex });
+
+                Thread pingThread = new Thread(new ParameterizedThreadStart(PingServer));
+                pingThread.Name = "ping_" + i.ToString();
+                pingThread.IsBackground = true;
+                pingThread.Start(new int[] { startIndex, endIndex });
+
+            }
+        }
+        string lastDomain = "";
+        void HttpGet(object p)
+        {
+            int[] range = p as int[];
+            int startIndex = range[0];
+            int endIndex = range[1];
+
+            
+            
+            HttpWebRequest req;
+            for(;startIndex < endIndex; startIndex++)
+            {
+                BaiDuResultInfo bd = this.m_DataSource[startIndex];
+
+                
                 try
                 {
                     req = (HttpWebRequest)HttpWebRequest.Create(lastDomain);
@@ -303,25 +372,70 @@ namespace WebServerScan
                     req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
                     req.Headers[HttpRequestHeader.AcceptLanguage] = "zh-cn,zh;q=0.5";
                     req.Headers[HttpRequestHeader.AcceptCharset] = "GB2312,utf-8;q=0.7,*;q=0.7";
-                    req.Method = "GET";                 
+                    req.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
+                    req.Method = "GET";
                     req.Proxy = new WebProxy(bd.IP, 80);
-                    req.Timeout = 5 * 1000;
+                    req.Timeout = this.m_TimeOut;
                     req.CookieContainer = new CookieContainer();
 
                     using (HttpWebResponse response = (HttpWebResponse)req.GetResponse())
                     {
+                        this.m_DataSource[bd.RowIndex].ContentLength = response.ContentLength;
                         this.m_DataSource[bd.RowIndex].HttpStatus = string.Format("{0}({1})", response.StatusCode, (int)response.StatusCode);
                         UpdateCellValue(bd.RowIndex, "HttpStatus", string.Format("{0}({1})", response.StatusCode, (int)response.StatusCode));
+                        UpdateCellValue(bd.RowIndex, "ContentLength", response.ContentLength);
                     }
                 }
                 catch (Exception ex)
                 {
                     UpdateCellValue(bd.RowIndex, "HttpStatus", ex.Message);
                 }
-                 
+
             }
-            m_WorkStatus++;
+            this.m_WorkStatus++;
         }
+
+        //void HttpGet(object p)
+        //{
+        //    ts_StatusLabel.Text = "正在查询WEB状态,此操作时间较长,请耐心等待...";
+        //    IList<BaiDuResultInfo> resultList = p as IList<BaiDuResultInfo>;
+        //    string lastDomain = "";
+        //    HttpWebRequest req;
+        //    foreach (BaiDuResultInfo bd in resultList)
+        //    {
+                 
+        //        if (!string.IsNullOrEmpty(bd.Url))
+        //            lastDomain = bd.Url;
+        //        try
+        //        {
+        //            req = (HttpWebRequest)HttpWebRequest.Create(lastDomain);
+        //            req.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13";
+        //            req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+        //            req.Headers[HttpRequestHeader.AcceptLanguage] = "zh-cn,zh;q=0.5";
+        //            req.Headers[HttpRequestHeader.AcceptCharset] = "GB2312,utf-8;q=0.7,*;q=0.7";
+        //            req.Method = "GET";                 
+        //            req.Proxy = new WebProxy(bd.IP, 80);
+        //            req.Timeout = this.m_TimeOut;
+        //            req.CookieContainer = new CookieContainer();
+
+        //            using (HttpWebResponse response = (HttpWebResponse)req.GetResponse())
+        //            {
+        //                this.m_DataSource[bd.RowIndex].ContentLength = response.ContentLength;
+        //                this.m_DataSource[bd.RowIndex].HttpStatus = string.Format("{0}({1})", response.StatusCode, (int)response.StatusCode);
+        //                UpdateCellValue(bd.RowIndex, "HttpStatus", string.Format("{0}({1})", response.StatusCode, (int)response.StatusCode));
+        //                UpdateCellValue(bd.RowIndex, "ContentLength", response.ContentLength);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            UpdateCellValue(bd.RowIndex, "HttpStatus", ex.Message);
+        //        }
+                 
+        //    }
+        //    m_WorkStatus++;
+        //}
+
+
         #endregion
 
         #region 修改单元格内容

@@ -32,6 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.label1 = new System.Windows.Forms.Label();
+            this.rb_ClassB = new System.Windows.Forms.RadioButton();
+            this.rb_ClassC = new System.Windows.Forms.RadioButton();
             this.tbUrls = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.plStatus = new System.Windows.Forms.Panel();
@@ -44,15 +47,18 @@
             this.dgvResult = new System.Windows.Forms.DataGridView();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.rb_ClassC = new System.Windows.Forms.RadioButton();
-            this.rb_ClassB = new System.Windows.Forms.RadioButton();
-            this.label1 = new System.Windows.Forms.Label();
+            this.tbTimeout = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Domain = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Url = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IP = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IsAlive = new System.Windows.Forms.DataGridViewImageColumn();
             this.HttpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ContentLength = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cb_ThreadCount = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -82,6 +88,11 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.label4);
+            this.splitContainer1.Panel1.Controls.Add(this.cb_ThreadCount);
+            this.splitContainer1.Panel1.Controls.Add(this.label3);
+            this.splitContainer1.Panel1.Controls.Add(this.label2);
+            this.splitContainer1.Panel1.Controls.Add(this.tbTimeout);
             this.splitContainer1.Panel1.Controls.Add(this.label1);
             this.splitContainer1.Panel1.Controls.Add(this.rb_ClassB);
             this.splitContainer1.Panel1.Controls.Add(this.rb_ClassC);
@@ -94,6 +105,37 @@
             this.splitContainer1.Size = new System.Drawing.Size(586, 87);
             this.splitContainer1.SplitterDistance = 360;
             this.splitContainer1.TabIndex = 11;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(1, 40);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 12);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "扫描：";
+            // 
+            // rb_ClassB
+            // 
+            this.rb_ClassB.AutoSize = true;
+            this.rb_ClassB.Location = new System.Drawing.Point(95, 38);
+            this.rb_ClassB.Name = "rb_ClassB";
+            this.rb_ClassB.Size = new System.Drawing.Size(41, 16);
+            this.rb_ClassB.TabIndex = 4;
+            this.rb_ClassB.Text = "B类";
+            this.rb_ClassB.UseVisualStyleBackColor = true;
+            // 
+            // rb_ClassC
+            // 
+            this.rb_ClassC.AutoSize = true;
+            this.rb_ClassC.Checked = true;
+            this.rb_ClassC.Location = new System.Drawing.Point(48, 38);
+            this.rb_ClassC.Name = "rb_ClassC";
+            this.rb_ClassC.Size = new System.Drawing.Size(41, 16);
+            this.rb_ClassC.TabIndex = 3;
+            this.rb_ClassC.TabStop = true;
+            this.rb_ClassC.Text = "C类";
+            this.rb_ClassC.UseVisualStyleBackColor = true;
             // 
             // tbUrls
             // 
@@ -189,6 +231,7 @@
             // 
             this.dgvResult.AllowUserToAddRows = false;
             this.dgvResult.AllowUserToDeleteRows = false;
+            this.dgvResult.AllowUserToOrderColumns = true;
             this.dgvResult.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvResult.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvResult.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -197,7 +240,8 @@
             this.Url,
             this.IP,
             this.IsAlive,
-            this.HttpStatus});
+            this.HttpStatus,
+            this.ContentLength});
             this.dgvResult.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvResult.Location = new System.Drawing.Point(0, 0);
             this.dgvResult.Name = "dgvResult";
@@ -216,36 +260,32 @@
             this.saveFileDialog1.FileName = "urls.txt";
             this.saveFileDialog1.Filter = "文本文件|*.txt";
             // 
-            // rb_ClassC
+            // tbTimeout
             // 
-            this.rb_ClassC.AutoSize = true;
-            this.rb_ClassC.Checked = true;
-            this.rb_ClassC.Location = new System.Drawing.Point(48, 38);
-            this.rb_ClassC.Name = "rb_ClassC";
-            this.rb_ClassC.Size = new System.Drawing.Size(41, 16);
-            this.rb_ClassC.TabIndex = 3;
-            this.rb_ClassC.TabStop = true;
-            this.rb_ClassC.Text = "C类";
-            this.rb_ClassC.UseVisualStyleBackColor = true;
+            this.tbTimeout.ImeMode = System.Windows.Forms.ImeMode.Alpha;
+            this.tbTimeout.Location = new System.Drawing.Point(213, 31);
+            this.tbTimeout.Name = "tbTimeout";
+            this.tbTimeout.Size = new System.Drawing.Size(44, 21);
+            this.tbTimeout.TabIndex = 6;
+            this.tbTimeout.Text = "5000";
             // 
-            // rb_ClassB
+            // label2
             // 
-            this.rb_ClassB.AutoSize = true;
-            this.rb_ClassB.Location = new System.Drawing.Point(95, 38);
-            this.rb_ClassB.Name = "rb_ClassB";
-            this.rb_ClassB.Size = new System.Drawing.Size(41, 16);
-            this.rb_ClassB.TabIndex = 4;
-            this.rb_ClassB.Text = "B类";
-            this.rb_ClassB.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(142, 40);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 12);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "超时时间：";
             // 
-            // label1
+            // label3
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(1, 40);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(41, 12);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "扫描：";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(263, 40);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(29, 12);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "毫秒";
             // 
             // ID
             // 
@@ -302,6 +342,42 @@
             this.HttpStatus.Name = "HttpStatus";
             this.HttpStatus.ReadOnly = true;
             // 
+            // ContentLength
+            // 
+            this.ContentLength.DataPropertyName = "ContentLength";
+            this.ContentLength.HeaderText = "大小";
+            this.ContentLength.Name = "ContentLength";
+            this.ContentLength.ReadOnly = true;
+            // 
+            // cb_ThreadCount
+            // 
+            this.cb_ThreadCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_ThreadCount.FormattingEnabled = true;
+            this.cb_ThreadCount.Items.AddRange(new object[] {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"});
+            this.cb_ThreadCount.Location = new System.Drawing.Point(213, 59);
+            this.cb_ThreadCount.Name = "cb_ThreadCount";
+            this.cb_ThreadCount.Size = new System.Drawing.Size(44, 20);
+            this.cb_ThreadCount.TabIndex = 9;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(154, 63);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(53, 12);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "线程数：";
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnSearch;
@@ -349,12 +425,18 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.RadioButton rb_ClassB;
         private System.Windows.Forms.RadioButton rb_ClassC;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox tbTimeout;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
         private System.Windows.Forms.DataGridViewTextBoxColumn Domain;
         private System.Windows.Forms.DataGridViewTextBoxColumn Url;
         private System.Windows.Forms.DataGridViewTextBoxColumn IP;
         private System.Windows.Forms.DataGridViewImageColumn IsAlive;
         private System.Windows.Forms.DataGridViewTextBoxColumn HttpStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ContentLength;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cb_ThreadCount;
     }
 }
 
