@@ -1,4 +1,4 @@
-﻿namespace BaiDuTop
+﻿namespace WebServerScan
 {
     partial class MainForm
     {

@@ -4,7 +4,7 @@ using System.Text;
 using System.Drawing;
 using System.Text.RegularExpressions;
 
-namespace BaiDuTop
+namespace WebServerScan
 {
     class BaiDuResultInfo
     {
@@ -79,9 +79,9 @@ namespace BaiDuTop
         {
             get {
                 if (this.m_IsAlive)
-                    return WebServerMon.Properties.Resources.greendot;
+                    return WebServerScan.Properties.Resources.greendot;
                 else
-                    return WebServerMon.Properties.Resources.reddot;
+                    return WebServerScan.Properties.Resources.reddot;
             }
         }
        

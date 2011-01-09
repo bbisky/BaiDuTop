@@ -12,7 +12,7 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Threading;
 
-namespace BaiDuTop
+namespace WebServerScan
 {
     public partial class MainForm : Form
     {               

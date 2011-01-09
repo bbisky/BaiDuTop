@@ -8,8 +8,8 @@
     <ProjectGuid>{97987140-533D-490C-9607-DD5C2086D40C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebServerMon</RootNamespace>
-    <AssemblyName>WebServerMon</AssemblyName>
+    <RootNamespace>WebServerScan</RootNamespace>
+    <AssemblyName>WebServerScan</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>App.ico</ApplicationIcon>
